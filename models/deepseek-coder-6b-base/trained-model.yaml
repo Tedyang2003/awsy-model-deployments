@@ -1,0 +1,10 @@
+apiVersion: "serving.kserve.io/v1alpha1"
+kind: "TrainedModel"
+metadata:
+  name: "deepseek-coder-6b-base"
+spec:
+  inferenceService: triton-is
+  model:
+    framework: transformers
+    storageUri: s3://finalised-models/model-repository/deepseek-coder-6b-base
+    memory: "5Gi"  

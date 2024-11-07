@@ -1,0 +1,12 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: k6-route
+  labels:
+    app: k6
+spec:
+  to:
+    kind: Service
+    name: k6-service  # The name of the service we created earlier
+  port:
+    targetPort: 5665  # The port that the k6 dashboard is running on

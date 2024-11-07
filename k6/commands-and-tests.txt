@@ -1,0 +1,100 @@
+Set up Prometheus with the following expressions
+k6 is also in config maps.
+
+GPU
+-----------------------------------------------------
+Gpu memory utilization: (nv_gpu_memory_used_bytes / nv_gpu_memory_total_bytes) * 100
+Gpu usage: nv_gpu_utilization
+
+
+Pinned Memory
+-----------------------------------------------------
+Pinned Memory Pool Utilization (%): (nv_pinned_memory_pool_used_bytes / nv_pinned_memory_pool_total_bytes) * 100
+Quick CPU to GPU memory
+
+
+VLLM (Token Generation) Metrics
+-----------------------------------------------------
+Token input processing throughput per second: rate(vllm:prompt_tokens_total[1m])
+Rate at which tokens get processed every second. 
+
+Token Generation throughput per second: rate(vllm:generation_tokens_total[1m])
+Rate at which tokens get generated every second
+
+Average Time to Generate Each Output Token: vllm:time_per_output_token_seconds_sum / vllm:time_per_output_token_seconds_count
+
+Time to First Token (tracking time delay before first output token): vllm:time_to_first_token_seconds_sum / vllm:time_to_first_token_seconds_count
+
+
+Inference Metrics
+----------------------------------------------------
+
+Success/Fail ratios (should be 1 and 0)
+rate(nv_inference_request_success[1m]) / rate(nv_inference_count[1m])
+rate(nv_inference_request_failure[1m]) / rate(nv_inference_count[1m])
+
+Average Inference Execution Count (per second) Number of requests being handled per second (should increase with memory and max_token_length)
+rate(nv_inference_exec_count[1m])
+
+
+Combination and general trend of requests (Latency of request handling and model execution)
+(rate(nv_inference_queue_duration_us[1m]) + 
+rate(nv_inference_compute_input_duration_us[1m]) + 
+rate(nv_inference_request_duration_us[1m]) + 
+rate(nv_inference_compute_output_duration_us[1m]) +
+rate(nv_inference_compute_infer_duration_us[1m]))/rate(nv_inference_count[1m])/1e6
+
+
+Look for spikes as well as the reason for the spikes. 
+
+
+
+# Run this for web dashboard
+K6_WEB_DASHBOARD=true k6 run /etc/k6-script/k6-script.js
+
+
+1. Smoke Test
+-----------------------------------------------------
+export const options = {
+    stages: [
+        { duration: '30s', target: 5 },
+        { duration: '60s', target: 5 },
+    ],
+};
+-----------------------------------------------------
+
+
+2. Avg Load Test
+-----------------------------------------------------
+export const options = {
+  stages: [
+    { duration: '5m', target: 10 },
+    { duration: '20m', target: 10 },
+    { duration: '5m', target: 0 },
+  ],
+};
+
+
+-----------------------------------------------------
+
+Look at metrics in the following manner 
+1. Check gpu metrics to see the gpu usage of the tests 
+    - See if usage is consistent 
+    - See if usage of memory is consistent
+
+2. Pinned memory should be 0
+
+3. Use vllm metrics to get an idea of its current token generation performance, such as speed and token surface area
+    - Token processing speed affects token generation speed as well
+    - Token generation time per token should be short as possible.
+
+4. Use inference time metrics to gauge consistent performance, look for sudden spikes and try to find out why. 
+    - Evaluate are the spikes cuz of something important
+    - Are the spikes likely due to queues
+
+
+5. Use k6 to check for 
+    - points of failure
+    - http/iteration duration
+
+Bench mark the results and Incease in increments of 20 VUs for load test and reevaluate

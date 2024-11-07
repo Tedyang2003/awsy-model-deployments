@@ -1,0 +1,12 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: prometheus-route
+  namespace: monitoring
+spec:
+  to:
+    kind: Service
+    name: prometheus-service  # Replace with the name of your Prometheus service
+  port:
+    targetPort: 9090  # Ensure this matches the Prometheus service port
+
