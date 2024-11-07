@@ -1,5 +1,13 @@
-Set up Prometheus with the following expressions
-k6 is also in config maps.
+Prometheus Deployment
+---------------------------------------------------
+Set up prometheus yaml manifest. Remember to change the prometheus target to the service abd metric port for the triton inference server .
+
+To use just go to the prometheus route.
+
+a dashboard ui will be hosted at the route. 
+
+
+in the dahsboard i recommend that you Set up Prometheus with the following expressions
 
 GPU
 -----------------------------------------------------
@@ -45,12 +53,18 @@ rate(nv_inference_compute_output_duration_us[1m]) +
 rate(nv_inference_compute_infer_duration_us[1m]))/rate(nv_inference_count[1m])/1e6
 
 
-Look for spikes as well as the reason for the spikes. 
 
+K6 Deployment
+---------------------------------------------------
+Set up k6 yaml manifests, the main k6 code is in the config maps. the deployment is just an infinite loop with nothing.
+Remember to change the url in the configmap to match the triton infernece server's service.
 
+To use k6 go to terminal and run the command below
 
-# Run this for web dashboard
 K6_WEB_DASHBOARD=true k6 run /etc/k6-script/k6-script.js
+
+a dashboard ui will be hosted at the route.
+
 
 
 1. Smoke Test

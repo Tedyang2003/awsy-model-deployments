@@ -1,0 +1,16 @@
+MODELS
+---------------------------
+Here you should see the folders of 4 models
+
+- deep seek 6b base
+- all minilm l6 v2
+- meta llama 3 8b instruct awq
+- seallms v3 7b chat
+
+Please ensure that the model name inside of configpbtxt matches that of the trained model resource (if used).
+Ensure that the folder path for the models with model.json with also point to a directory with the same model name.
+
+I have only loaded the 3 new model weigth repo files onto babasaur, llama is not included. 
+
+* For the ensemble model all-minilm-l6-v2, its  model.onnx is together with its pbtxt in a sub folder named model. 
+Its tokenizer files are inside wth the sub folder called tokenizer

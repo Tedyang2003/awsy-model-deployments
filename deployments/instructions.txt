@@ -1,0 +1,36 @@
+Deployments
+--------------------------------
+This folder contains 2 deployments, onnx and vllm
+
+
+VLLM 
+-------------------------------
+For the VLLM deployments, there are 4 componetents
+- infer service
+- serving runtime 
+- service account 
+- secret
+
+For the model yamls themselves, they are found in the modes directory
+
+The models involved for vllm include
+- Deep Seek 6.7B
+- Llama 3 8B Instruct AWQ
+- SeaLLM 7bB Chat
+
+^ Your will find their model file and yamls in their respective directories. Ensure that the inference service is given more than sufficient 
+memory (40GB?), else it might lead to ubrupt OOM crashes for the pod
+
+ONNX
+----------------------------------
+For the Onnx deployment, there are only 2 components
+- inference service
+- serving runtime
+
+The models involved for onnx include
+- All Minilm L6 v2
+
+^ This is an ensemble seperated by tokenizer and transformer. This implementation connects triton to the s3 directly.
+Remember to change the link  in the serving run time to a url pointing to your repo
+
+

@@ -5,7 +5,7 @@ metadata:
   labels:
     app: k6
 spec:
-  replicas: 1
+  replicas: 1  # You can adjust the number of replicas if needed
   selector:
     matchLabels:
       app: k6
@@ -16,17 +16,17 @@ spec:
     spec:
       containers:
         - name: k6
-          image: grafana/k6:0.54.0
-          command: ["k6", "run", "/etc/k6-script/k6-script.js"]  # Run k6 script from the mounted file
+          image: grafana/k6:0.54.0  # You can use any base image here; it could be just a lightweight base image if you don't need k6
+          command: ["sh", "-c", "while true; do sleep 1000; done"]  # Keep the container running indefinitely
           env:
             - name: K6_WEB_DASHBOARD
-              value: "true"  # Enable the k6 web dashboard
+              value: "true"  # Enable the k6 web dashboard if needed
           volumeMounts:
             - name: k6-script-volume
-              mountPath: /etc/k6-script  # Mount the ConfigMap as a volume
+              mountPath: /etc/k6-script  # Mount the ConfigMap as a volume (if needed)
               readOnly: true  # Make it read-only since it's only for reading the script
           ports:
-            - containerPort: 5665  # Expose port 5665 for the k6 web dashboard
+            - containerPort: 5665  # Expose port for the k6 web dashboard (if needed)
           resources:
             requests:
               memory: "512Mi"
@@ -37,4 +37,4 @@ spec:
       volumes:
         - name: k6-script-volume
           configMap:
-            name: k6-script  # Reference the ConfigMap we created
+            name: k6-script  # Reference the ConfigMap if required
