@@ -1,0 +1,44 @@
+inferenceService:
+  name: triton-is
+  targetReplicas: 1
+  serviceAccountName: models-bucket-sa
+
+  requests:
+    cpu: "2"
+    memory: "10Gi"
+  
+  limits:
+    cpu: "2"
+    memory: "20Gi"
+
+
+secret:
+  name: s3creds
+  awsAccessKeyId: bWluaW8=
+  awsSecretAccessKey: bWluaW8xMjM=
+  s3Endpoint: minio-service.triton-inference-services.svc.cluster.local:9000
+  s3Region: us-east-1
+  useHttps: 0
+
+
+serviceAccount:
+  name: models-bucket-sa
+
+
+servingRuntime:
+  name: triton-runtime
+  image: nvcr.io/nvidia/tritonserver:24.08-vllm-python-py3
+  ncclDebug: TRACE
+  ncclP2P: "0"
+  visibleDevices: "0"
+  p2pMemory: "1Gi"
+
+
+trainedModels:
+  - name: "meta-llama-3-8b-instruct-awq"
+    storageUri: "s3://finalised-models/model-repository/meta-llama-3-8b-instruct-awq"
+    memory: "5Gi"
+
+route:
+  main: triton-route
+  monitoring: monitoring

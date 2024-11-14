@@ -1,0 +1,14 @@
+apiVersion: v1
+entries:
+  triton-inference-chart:
+  - apiVersion: v2
+    appVersion: "1.0"
+    created: "2024-10-08T09:06:36.3744055+08:00"
+    description: A Helm chart to deploy Triton InferenceService with KServe on OpenShift
+      for Transformers
+    digest: a70a03725d52a8754466041b293b2b276e1feca49ba29773fbaed8d2cdf8ec5a
+    name: triton-inference-chart
+    urls:
+    - http://minio-service.triton-inference-services.svc.cluster.local:9000/helm-storage/kserve-vllm/triton-kserve-vllm-chart-0.1.0.tgz
+    version: 0.1.0
+generated: "2024-10-08T09:06:36.3700657+08:00"

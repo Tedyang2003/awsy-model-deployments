@@ -1,0 +1,48 @@
+apiVersion: serving.kserve.io/v1alpha1
+kind: ServingRuntime
+metadata:
+  name: {{ .Values.servingRuntime.name }}
+spec:
+  containers:
+    - args:
+        - tritonserver
+        - "--model-repository=/mnt/models"
+        - "--model-control-mode=explicit"
+        - "--http-port=8080"
+        - "--log-verbose=1"
+      image: {{ .Values.servingRuntime.image }}
+      name: kserve-container
+      ports:
+        - name: http-port
+          containerPort: 8080
+        - name: grpc-port
+          containerPort: 8001
+        - name: metrics
+          containerPort: 8002
+      env:
+        - name: HF_HOME
+          value: /opt/tritonserver/caches
+        - name: HOME
+          value: /opt/tritonserver/caches
+        - name: NCCL_DEBUG
+          value: {{ .Values.servingRuntime.ncclDebug }}
+        - name: NCCL_IGNORE_DISABLED_P2P
+          value: "{{ .Values.servingRuntime.ncclP2P }}"
+        - name: CUDA_VISIBLE_DEVICES
+          value: "{{ .Values.servingRuntime.visibleDevices }}"
+      volumeMounts:
+        - mountPath: /dev/shm
+          name: dshm
+  multiModel: false
+  protocolVersions:
+    - v2
+    - grpc-v2
+  supportedModelFormats:
+    - autoSelect: true
+      name: transformers
+      version: latest
+  volumes:
+    - name: dshm
+      emptyDir:
+        medium: Memory
+        sizeLimit: {{ .Values.servingRuntime.p2pMemory }}

@@ -1,36 +1,93 @@
-Deployments
---------------------------------
-This folder contains 2 deployments, onnx and vllm
+### VLLM Deployment Files
+--------------------------------------------
+For VLLM deployment, three main components are provided:
+- Original Deployment Files
+- Unpackaged Helm Chart
+- Packaged Helm Chart
+
+These files serve as references for deploying in production or staging environments. Model configurations in `model.json` and the `config.pbtxt` files for each model have been pre-configured according to our Monday discussion.
+
+Below are key deployment considerations for each component.
 
 
-VLLM 
--------------------------------
-For the VLLM deployments, there are 4 componetents
-- infer service
-- serving runtime 
-- service account 
-- secret
+Inference Service
+--------------------------------------------
+The inference service manifest is crucial for kserve to spin up pods with the appropriate resources. 
+Key configurations to focus on include:
 
-For the model yamls themselves, they are found in the modes directory
+minReplicas, scaleTarget, and `autoscaling.knative.dev/target: "1"`
+-------------------------------------------------------------------------------------
 
-The models involved for vllm include
-- Deep Seek 6.7B
-- Llama 3 8B Instruct AWQ
-- SeaLLM 7bB Chat
+annotation:
+  autoscaling.knative.dev/target: "1"
 
-^ Your will find their model file and yamls in their respective directories. Ensure that the inference service is given more than sufficient 
-memory (40GB?), else it might lead to ubrupt OOM crashes for the pod
-
-ONNX
-----------------------------------
-For the Onnx deployment, there are only 2 components
-- inference service
-- serving runtime
-
-The models involved for onnx include
-- All Minilm L6 v2
-
-^ This is an ensemble seperated by tokenizer and transformer. This implementation connects triton to the s3 directly.
-Remember to change the link  in the serving run time to a url pointing to your repo
+minReplicas: 1
+scaleTarget: 1
 
 
+A common misconception with `minReplicas` is that it can support values of 2, 3, etc., for multiple pods. 
+However, this property only controls whether we want to allow serverless functionality, and it only accepts two values: 1 (for always running) or 0 (for serverless mode).
+
+To achieve multiple replicas (e.g., spinning up 2 pods for the same inference service), you must use `scaleTarget` along with the `autoscaling.knative.dev/target` annotation.
+
+nvidia.com/gpu
+--------------------------------------------------------------------------------------
+During earlier discussions, we considered using `nvidia.com/gpu` to associate specific GPUs with different pods. However, after further research, it appears that this approach is not ideal, particularly when combined with `scaleTarget`.
+
+The main issue is that by specifying `nvidia.com/gpu`, we are instructing OpenShift to directly assign a GPU to each pod. While this may seem beneficial for reserving specific GPUs, it creates conflicts when serving multiple instances of Triton.
+For example, if `scaleTarget` is set to 2 and kserve initiates 2 instances, each instance will run on a different GPU, which may interfere with serving multiple Triton instances effectively. 
+
+We will instead use CUDA_VISIBLE DEVICES. 
+
+
+
+
+Serving Runtime
+--------------------------------------------
+
+Next, for the serving runtime, there have been significant changes, particularly in the `env` section. This new iteration of the deployment introduces 3 new environment variables.
+
+NCCL Related
+--------------------------------------------------------------
+
+NCCL is a tool used by Triton to enable split GPU processing and model loading, allowing the model to be distributed across multiple GPUs. 
+There are two types of NCCL communications: P2P (Peer-to-Peer) and Non-P2P.
+
+- P2P is only available for certain GPUs with direct GPU-to-GPU connections. 
+  (The A100 has been listed to support this capability, but it is not confirmed if it works properly.)
+- RTX is not listed as supporting P2P and therefore defaults to Non-P2P.
+
+NCCL_DEBUG
+- name: NCCL_DEBUG  
+- value: TRACE  
+  - This variable helps trace NCCL debug errors.
+
+NCCL_IGNORE_DISABLED_P2P
+- name: NCCL_IGNORE_DISABLED_P2P  
+- value: 1  
+  - This variable instructs Triton to suppress P2P messages when P2P is unavailable.
+
+If P2P is unavailable, Triton will use local RAM and memory as a substitute to transfer data between GPUs. 
+For Non-P2P, volume and volume mounts are required to store the transferred data, so the following components has been added:
+
+volumeMounts:
+- mountPath: /dev/shm
+  name: dshm
+
+volumes:
+- name: dshm
+  emptyDir:
+    medium: Memory
+    sizeLimit: 2Gi
+
+
+CUDA Related
+--------------------------------------------------------------
+
+CUDA_VISIBLE_DEVICES
+- name: CUDA_VISIBLE_DEVICES  
+- value: "0"  
+  - This variable is used by Triton VLLM to control GPU usage without occupying the entire GPU. 
+    It must be set as a string. You can select multiple GPUs by typing `"0,1"`, with the numbers 
+    corresponding to the GPU indices found using the `nvidia-smi` command. 
+    Ensure there are no spaces within the string.
