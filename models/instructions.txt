@@ -7,7 +7,7 @@ Here you should see the folders of 4 models
 - meta llama 3 70b instruct
 - seallms v3 7b chat
 
-Please ensure that the model name inside of configpbtxt matches that of the trained model resource (if used).
+Please ensure that the model name inside of config.pbtxt matches that of the trained model resource
 Ensure that the folder path for the models with model.json with also point to a directory with the same model name.
 
-I have  loaded the 4 new model weight repo files onto babasaur.
+I have loaded the 4 new model weight repo files onto babasaur.

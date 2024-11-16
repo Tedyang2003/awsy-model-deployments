@@ -1,4 +1,4 @@
-name: "seallms-v3-7b-chat"
+name: "gemma2-9b-v1-instruct"
 backend: "vllm"
 
 # The usage of device is deferred to the vLLM engine

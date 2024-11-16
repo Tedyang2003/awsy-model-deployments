@@ -9,6 +9,17 @@ These files serve as references for deploying in production or staging environme
 
 Below are key deployment considerations for each component.
 
+Secret
+-------------------------------------------
+serving.kserve.io/s3-endpoint: minio-service.triton-inference-services.svc.cluster.local:9000
+serving.kserve.io/s3-usehttps: "0"
+serving.kserve.io/s3-region: "us-east-1"
+serving.kserve.io/s3-usevirtualbucket: "false"
+  
+^These are placed in annotations to configure the connection to your bucket
+
+
+
 
 Inference Service
 --------------------------------------------

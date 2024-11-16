@@ -1,5 +1,0 @@
-apiVersion: v2
-name: triton-kserve-vllm-chart
-description: A Helm chart to deploy Triton InferenceService with KServe on OpenShift for Transformers
-version: 0.1.0
-appVersion: "1.0"

@@ -1,10 +1,10 @@
 apiVersion: "serving.kserve.io/v1alpha1"
 kind: "TrainedModel"
 metadata:
-  name: "seallms-v3-7b-chat"
+  name: "gemma2-9b-v1-instruct"
 spec:
   inferenceService: triton-is
   model:
     framework: transformers
-    storageUri: s3://finalised-models/model-repository/seallms-v3-7b-chat
+    storageUri: s3://finalised-models/model-repository/gemma2-9b-v1-instruct
     memory: "5Gi"  
