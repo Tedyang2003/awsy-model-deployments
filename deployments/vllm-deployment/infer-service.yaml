@@ -11,7 +11,7 @@ metadata:
   name: triton-is
 spec:
   predictor:
-    minReplicas: 1
+    minReplicas: 2
     scaleTarget: 2
     serviceAccountName: models-bucket-sa
     model:
@@ -21,10 +21,10 @@ spec:
       resources:
         requests:
           cpu: "2"
-          memory: "10Gi"  # Adjust this value
+          memory: "20Gi"  # Adjust this value
           nvidia.com/gpu: 1
         limits:
           cpu: "2"
-          memory: "20Gi"    # Adjust this value
+          memory: "30Gi"    # Adjust this value
           nvidia.com/gpu: 1
       

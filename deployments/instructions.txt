@@ -19,37 +19,24 @@ serving.kserve.io/s3-usevirtualbucket: "false"
 ^These are placed in annotations to configure the connection to your bucket
 
 
-
-
 Inference Service
 --------------------------------------------
 The inference service manifest is crucial for kserve to spin up pods with the appropriate resources. 
 Key configurations to focus on include:
 
-minReplicas, scaleTarget, and `autoscaling.knative.dev/target: "1"`
--------------------------------------------------------------------------------------
-
-annotation:
-  autoscaling.knative.dev/target: "1"
-
-minReplicas: 1
-scaleTarget: 1
-
-
-A common misconception with `minReplicas` is that it can support values of 2, 3, etc., for multiple pods. 
-However, this property only controls whether we want to allow serverless functionality, and it only accepts two values: 1 (for always running) or 0 (for serverless mode).
-
-To achieve multiple replicas (e.g., spinning up 2 pods for the same inference service), you must use `scaleTarget` along with the `autoscaling.knative.dev/target` annotation.
+minReplicas/scaleTarget and  autoscaling.knative.dev/target
+--------------------------------------------------------------------------------------
+When spinning multiple replicas change these to the number of replicas you want. 
+The behaviour may change from version to version, hence to ensure that there is 2, I recommend just setting all 3 to 2 
+In nebula, the minReplicas was the parameter that scaled my pods to 2
+There is a short delay between multiple pods spin ups (less than 1 minute)
+The same trained model resource will also be applied to both pods 
 
 nvidia.com/gpu
 --------------------------------------------------------------------------------------
-During earlier discussions, we considered using `nvidia.com/gpu` to associate specific GPUs with different pods. However, after further research, it appears that this approach is not ideal, particularly when combined with `scaleTarget`.
-
-The main issue is that by specifying `nvidia.com/gpu`, we are instructing OpenShift to directly assign a GPU to each pod. While this may seem beneficial for reserving specific GPUs, it creates conflicts when serving multiple instances of Triton.
-For example, if `scaleTarget` is set to 2 and kserve initiates 2 instances, each instance will run on a different GPU, which may interfere with serving multiple Triton instances effectively. 
-
-We will instead use CUDA_VISIBLE DEVICES. 
-
+This resource is declared in the inference serivce which will dictate how many gpus to reserve per pod. 
+If set to 1 and the inference service is scaled to 2, it would mean that kserve will assocaiate 1 gpu for each instance 
+if available
 
 
 
@@ -91,14 +78,3 @@ volumes:
     medium: Memory
     sizeLimit: 2Gi
 
-
-CUDA Related
---------------------------------------------------------------
-
-CUDA_VISIBLE_DEVICES
-- name: CUDA_VISIBLE_DEVICES  
-- value: "0"  
-  - This variable is used by Triton VLLM to control GPU usage without occupying the entire GPU. 
-    It must be set as a string. You can select multiple GPUs by typing `"0,1"`, with the numbers 
-    corresponding to the GPU indices found using the `nvidia-smi` command. 
-    Ensure there are no spaces within the string.
