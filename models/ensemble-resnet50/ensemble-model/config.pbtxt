@@ -1,5 +1,4 @@
 name: "ensemble-model"
-max_batch_size: 0 
 platform: "ensemble"
 
 # Input to the model 

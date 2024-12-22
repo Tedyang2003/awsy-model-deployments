@@ -18,7 +18,6 @@ output [
 ]
 
 
-# The usage of device is deferred to the vLLM engine
 instance_group [
   {
     count: 1

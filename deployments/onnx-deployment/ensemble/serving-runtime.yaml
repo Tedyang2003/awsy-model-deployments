@@ -5,10 +5,11 @@ metadata:
 spec:
   containers:
     - args:
-        - /bin/bash
-        - -c
-        - |
-          tritonserver --model-repository=s3://minio-service.triton-inference-services.svc.cluster.local:9000/finalised-models/image-ensemble --model-control-mode=poll --http-port=8080 
+        - tritonserver
+        - "--model-repository=s3://minio-service.triton-inference-services.svc.cluster.local:9000/finalised-models/ensemble-resnet50" # Change Path accordingly
+        - "--model-control-mode=explicit"
+        - "--http-port=8080"
+        - "--load-model=ensemble-model"  # change according to model name
       image: nvcr.io/nvidia/tritonserver:24.08-py3
       name: kserve-container
       ports:
@@ -36,4 +37,3 @@ spec:
   supportedModelFormats:
     - name: triton
       version: latest
-
