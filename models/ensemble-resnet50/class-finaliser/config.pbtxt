@@ -1,0 +1,35 @@
+name: "finalizer"
+backend: "python"
+
+input [
+  {
+    name: "output_classifier_1"
+    data_type: TYPE_FP32
+    dims: [-1, 1000]
+  },
+  {
+    name: "output_classifier_2"
+    data_type: TYPE_FP32
+    dims: [-1, 1000]
+  },
+  {
+    name: "output_classifier_3"
+    data_type: TYPE_FP32
+    dims: [-1, 1000]
+  }
+]
+
+output [
+  {
+    name: "final_output"
+    data_type: TYPE_STRING
+    dims: [-1, 1]
+  }
+]
+
+instance_group [
+  {
+    count: 1
+    kind: KIND_CPU
+  }
+]
