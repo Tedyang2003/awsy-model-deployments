@@ -1,0 +1,10 @@
+apiVersion: "serving.kserve.io/v1alpha1"
+kind: "TrainedModel"
+metadata:
+  name: "distilbart-cnn-12-6"
+spec:
+  inferenceService: triton-is
+  model:
+    framework: transformers
+    storageUri: s3://finalised-models/model-repository/distilbart-cnn-12-6
+    memory: "5Gi"  
